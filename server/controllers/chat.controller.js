@@ -15,12 +15,12 @@ import { deleteFromCloudinary } from "../utils/cloudinary.utils.js";
 export const newGroupChat = expressAsyncHandler(async (req, res) => {
   const { name, members } = req.body;
 
-  if (members.length < 2) {
-    // throws error
-    const err = new Error("Group chat must have ay least 3 members");
-    err.statusCode = 400;
-    throw err;
-  }
+  // if (members.length < 2) {
+  //   // throws error
+  //   const err = new Error("Group chat must have ay least 3 members");
+  //   err.statusCode = 400;
+  //   throw err;
+  // }
 
   const allMembers = [...members, req.user];
 
@@ -105,12 +105,12 @@ export const addMembers = expressAsyncHandler(async (req, res) => {
 
   const chat = await Chat.findById(chatId);
 
-  if (!chat) {
-    // throws error
-    const err = new Error("Chat not found");
-    err.statusCode = 404;
-    throw err;
-  }
+  // if (!chat) {
+  //   // throws error
+  //   const err = new Error("Chat not found");
+  //   err.statusCode = 404;
+  //   throw err;
+  // }
 
   if (!chat.groupChat) {
     // throws err (bad request)
@@ -271,6 +271,20 @@ export const leaveGroup = expressAsyncHandler(async (req, res) => {
 export const sendAttachments = expressAsyncHandler(async (req, res) => {
   const { chatId } = req.body;
 
+  const files = req.files || [];
+
+  if (files.length < 1) {
+    const err = new Error("Please Upload Attachments");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (files.length > 5) {
+    const err = new Error("Attachments can't be more than 5");
+    err.statusCode = 400;
+    throw err;
+  }
+
   const [chat, me] = await Promise.all([
     Chat.findById(chatId),
     User.findById(req.user, "name"),
@@ -282,8 +296,6 @@ export const sendAttachments = expressAsyncHandler(async (req, res) => {
     err.statusCode = 404;
     throw err;
   }
-
-  const files = req.files || [];
 
   if (files.length < 1) {
     // throws error
